@@ -1,5 +1,8 @@
 #include <Bluepad32.h>
 #include <ESP32Servo.h>
+#include <Adafruit_PWMServoDriver.h>
+
+Adafruit_PWMServoDriver pwm;
 
 //I don't know how many pins are available and which ones to use.
 //Please modify according to preference and Expansion board of ESP32.
@@ -22,43 +25,34 @@ const int motor4Pin2 = 19;
 
 int joystickThreshold = 15;  // Deadzone for joystick input
 
+#define numServo 12
+#define servoMin 0
+#define servoMax 180
+
+// Define servo pin assignments for Both Arms
+int servoPins[numServo] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};  // 0 - 5 = Left arm, 6 - 11 = Right Arm.
+
 // Create servo objects for 6 servos on Left Arm
-Servo servoBaseLeft;
+Servo servoBaseLeft ;
 Servo servoShoulderLeft;
-Servo servoElbowLeft;
-Servo servoWristRollLeft;
-Servo servoWristPitchLeft;
-Servo servoGripLeft;
+Servo servoElbowLeft ;
+Servo servoWristRollLeft ;
+Servo servoWristPitchLeft ;
+Servo servoGripLeft ;
 
 // Create servo objects for 6 servos on Right Arm
-Servo servoBaseRight;
-Servo servoShoulderRight;
-Servo servoElbowRight;
-Servo servoWristRollRight;
-Servo servoWristPitchRight;
+Servo servoBaseRight ;
+Servo servoShoulderRight ;
+Servo servoElbowRight ;
+Servo servoWristRollRight ;
+Servo servoWristPitchRight ;
 Servo servoGripRight;
 
-// Define servo pin assignments for Left Arm
-int servoBaseLeftPin = 20;
-int servoShoulderLeftPin = 21;
-int servoElbowLeftPin = 22;
-int servoWristRollLeftPin = 23;
-int servoWristPitchLeftPin = 24;
-int servoGripLeftPin = 25;
-
-// Define servo pin assignments for Right Arm
-int servoBaseRightPin = 26;
-int servoShoulderRightPin = 27;
-int servoElbowRightPin = 28;
-int servoWristRollRightPin = 29;
-int servoWristPitchRightPin = 30;
-int servoGripRightPin = 31;
-
 // Define rover control pins
-const int roverForwardPin = 32;  // Example pin, change as needed
-const int roverBackwardPin = 33; // Example pin, change as needed
-const int roverLeftPin = 34;     // Example pin, change as needed
-const int roverRightPin = 35;    // Example pin, change as needed
+const int roverForwardPin = 21;  // Example pin, change as needed
+const int roverBackwardPin = 22; // Example pin, change as needed
+const int roverLeftPin = 23;     // Example pin, change as needed
+const int roverRightPin = 24;    // Example pin, change as needed
 
 int minUs = 1000; // Minimum microsecond pulse width
 int maxUs = 2000; // Maximum microsecond pulse width
@@ -82,7 +76,7 @@ int servoSpeed = 20;
 enum ControlMode { LEFT_ARM, RIGHT_ARM, BOTH_ARMS, ROVER };
 ControlMode currentMode = BOTH_ARMS;  // Start in both arms mode
 
-
+//Define Gamepad
 GamepadPtr myGamepad;
 
 void setup() {
@@ -106,22 +100,7 @@ void setup() {
   ESP32PWM::allocateTimer(1);
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
-
-  // Attach servos to Left Arm pins
-  servoBaseLeft.attach(servoBaseLeftPin, minUs, maxUs);
-  servoShoulderLeft.attach(servoShoulderLeftPin, minUs, maxUs);
-  servoElbowLeft.attach(servoElbowLeftPin, minUs, maxUs);
-  servoWristRollLeft.attach(servoWristRollLeftPin, minUs, maxUs);
-  servoWristPitchLeft.attach(servoWristPitchLeftPin, minUs, maxUs);
-  servoGripLeft.attach(servoGripLeftPin, minUs, maxUs);
-
-  // Attach servos to Right Arm pins
-  servoBaseRight.attach(servoBaseRightPin, minUs, maxUs);
-  servoShoulderRight.attach(servoShoulderRightPin, minUs, maxUs);
-  servoElbowRight.attach(servoElbowRightPin, minUs, maxUs);
-  servoWristRollRight.attach(servoWristRollRightPin, minUs, maxUs);
-  servoWristPitchRight.attach(servoWristPitchRightPin, minUs, maxUs);
-  servoGripRight.attach(servoGripRightPin, minUs, maxUs);
+  
 
   // Initialize servos for both arms
   resetServos();
@@ -131,6 +110,7 @@ void setup() {
   pinMode(roverBackwardPin, OUTPUT);
   pinMode(roverLeftPin, OUTPUT);
   pinMode(roverRightPin, OUTPUT);
+
 }
 
 void loop() {
