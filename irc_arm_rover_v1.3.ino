@@ -7,6 +7,7 @@ Adafruit_PWMServoDriver pca9685 = Adafruit_PWMServoDriver(0x40);
 
 //I don't know how many pins are available and which ones to use.
 //Please modify according to preference and Expansion board of ESP32.
+//Modify PCA9685 Pins accordingly.
 
 // Define motor control pins for Front Left motor (Motor 1)
 const int motor1Pin1 = 12;
@@ -27,41 +28,22 @@ const int motor4Pin2 = 19;
 int joystickThreshold = 15;  // Deadzone for joystick input
 
 #define numServo 12
-#define SERVOMIN  80  // Minimum value
-#define SERVOMAX  600  // Maximum value
-
-// Define servo pin assignments for Both Arms
-int servoPins[numServo] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};  // 0 - 5 = Left arm, 6 - 11 = Right Arm.
+#define SERVOMIN 800  // Minimum pulse width value
+#define SERVOMAX 2150  // Maximum pulse width value
 
 // Define servo motor connections (expand as required)
-#define SER1 servoPins[0]  //Servo Motor 1 on connector 0
-#define SER2 servoPins[1]  //Servo Motor 2 on connector 1
-#define SER3 servoPins[2]  //Servo Motor 3 on connector 2
-#define SER4 servoPins[3]  //Servo Motor 4 on connector 3
-#define SER5 servoPins[4]  //Servo Motor 5 on connector 4
-#define SER6 servoPins[5]  //Servo Motor 6 on connector 5
-#define SER7 servoPins[6]  //Servo Motor 7 on connector 6
-#define SER8 servoPins[7]  //Servo Motor 8 on connector 7
-#define SER9 servoPins[8]  //Servo Motor 9 on connector 8
-#define SER10 servoPins[9]  //Servo Motor 10 on connector 9
-#define SER11 servoPins[10]  //Servo Motor 11 on connector 10
-#define SER12 servoPins[11]  //Servo Motor 12 on connector 11
-
-// Create servo objects for 6 servos on Left Arm
-Servo servoBaseLeft SER1;
-Servo servoShoulderLeft SER2;
-Servo servoElbowLeft SER3;
-Servo servoWristRollLeft SER4;
-Servo servoWristPitchLeft SER5;
-Servo servoGripLeft SER6;
-
-// Create servo objects for 6 servos on Right Arm
-Servo servoBaseRight SER7;
-Servo servoShoulderRight SER8;
-Servo servoElbowRight SER9;
-Servo servoWristRollRight SER10;
-Servo servoWristPitchRight SER11;
-Servo servoGripRight SER12;
+#define SER_LB 0 //Servo Motor 1 on connector 0, LeftBase
+#define SER_LS 1 //Servo Motor 2 on connector 1, LeftShoulder
+#define SER_LE 2 //Servo Motor 3 on connector 2, LeftElbow
+#define SER_LW 3  //Servo Motor 4 on connector 3, LeftWrist
+#define SER_LR 4 //Servo Motor 5 on connector 4, LeftRoll
+#define SER_LC 5  //Servo Motor 6 on connector 5, LeftClaw
+#define SER_RB 6  //Servo Motor 7 on connector 6, RightBase
+#define SER_RS 7  //Servo Motor 8 on connector 7, RightShoulder
+#define SER_RE 8  //Servo Motor 9 on connector 8, RightElbow
+#define SER_RW 9  //Servo Motor 10 on connector 9, RightWrist
+#define SER_RR 10  //Servo Motor 11 on connector 10, RightRoll
+#define SER_RC 11 //Servo Motor 12 on connector 11, RightClaw
 
 // Define rover control pins
 const int roverForwardPin = 21;  // Example pin, change as needed
@@ -349,14 +331,26 @@ void stopMovement()
   digitalWrite(motor4Pin2, LOW);
 }
 
+void angleToPulse()
+{
+  return map(angle, 0, 180, SERVOMIN, SERVOMAX); 
+}
+
 // Reset servo positions
 void resetServos() 
 {
-  servoGripLeft.write(gripAngleLeft);
-  servoWristRollLeft.write(wristRollAngleLeft);
-
-  servoGripRight.write(gripAngleRight);
-  servoWristRollRight.write(wristRollAngleRight);
+  pca9685.setPWM(SER_LB, 0, angleToPulse(90));
+  pca9685.setPWM(SER_LS, 0, angleToPulse(90));
+  pca9685.setPWM(SER_LE, 0, angleToPulse(90));
+  pca9685.setPWM(SER_LW, 0, angleToPulse(90));
+  pca9685.setPWM(SER_LR, 0, angleToPulse(90));
+  pca9685.setPWM(SER_LC, 0, angleToPulse(90));
+  pca9685.setPWM(SER_RB, 0, angleToPulse(90));
+  pca9685.setPWM(SER_RS, 0, angleToPulse(90));
+  pca9685.setPWM(SER_RE, 0, angleToPulse(90));
+  pca9685.setPWM(SER_RW, 0, angleToPulse(90));
+  pca9685.setPWM(SER_RR, 0, angleToPulse(90));
+  pca9685.setPWM(SER_RC, 0, angleToPulse(90));
 }
 
 // Switch between different control modes
@@ -416,44 +410,44 @@ void controlLeftArm(int leftX, int leftY, int rightX, int rightY)
   // Base movement
   if (leftX < -joystickThreshold && baseAngleLeft < 180) {
     baseAngleLeft++;
-    servoBaseLeft.write(baseAngleLeft);
+    pca9685.setPWM(SER_LB, 0, angleToPulse(baseAngleLeft))
     delay(servoSpeed);
   } else if (leftX > joystickThreshold && baseAngleLeft > 0) {
     baseAngleLeft--;
-    servoBaseLeft.write(baseAngleLeft);
+    pca9685.setPWM(SER_LB, 0, angleToPulse(baseAngleLeft));
     delay(servoSpeed);
   }
 
   // Shoulder movement
   if (leftY < -joystickThreshold && shoulderAngleLeft < 180) {
     shoulderAngleLeft++;
-    servoShoulderLeft.write(shoulderAngleLeft);
+    pca9685.setPWM(SER_LS, 0, shoulderAngleLeft);
     delay(servoSpeed);
   } else if (leftY > joystickThreshold && shoulderAngleLeft > 0) {
     shoulderAngleLeft--;
-    servoShoulderLeft.write(shoulderAngleLeft);
+    pca9685.setPWM(SER_LS, 0, shoulderAngleLeft);
     delay(servoSpeed);
   }
 
   // Elbow movement
   if (rightX < -joystickThreshold && elbowAngleLeft < 180) {
     elbowAngleLeft++;
-    servoElbowLeft.write(elbowAngleLeft);
+    pca9685.setPWM(SER_LE, 0, elbowAngleLeft);
     delay(servoSpeed);
   } else if (rightX > joystickThreshold && elbowAngleLeft > 0) {
     elbowAngleLeft--;
-    servoElbowLeft.write(elbowAngleLeft);
+    pca9685.setPWM(SER_LE, 0, elbowAngleLeft);
     delay(servoSpeed);
   }
 
   // Wrist pitch movement
   if (rightY < -joystickThreshold && wristPitchAngleLeft < 180) {
     wristPitchAngleLeft++;
-    servoWristPitchLeft.write(wristPitchAngleLeft);
+    pca9685.setPWM(SER_LW, 0, wristPitchAngleLeft);
     delay(servoSpeed);
   } else if (rightY > joystickThreshold && wristPitchAngleLeft > 0) {
     wristPitchAngleLeft--;
-    servoWristPitchLeft.write(wristPitchAngleLeft);
+    pca9685.setPWM(SER_LW, 0, wristPutchAngleLeft);
     delay(servoSpeed);
   }
 
@@ -461,18 +455,18 @@ void controlLeftArm(int leftX, int leftY, int rightX, int rightY)
   uint16_t buttons = myGamepad->buttons();  // Read the button values
   if (buttons & 0x04) {  // D-Pad right pressed
     wristRollAngleLeft++;
-    servoWristRollLeft.write(wristRollAngleLeft);
+    pca9685.setPWM(SER_LR, 0, wristRollAngleLeft);
     delay(servoSpeed);
   } else if (buttons & 0x08) {  // D-Pad left pressed
     wristRollAngleLeft--;
-    servoWristRollLeft.write(wristRollAngleLeft);
+    pca9685.setPWM(SER_LR, 0, writsRollAngleLeft);
     delay(servoSpeed);
   }
 
   // Grip control (D-Pad down)
   if (buttons & 0x02) {  // D-Pad down pressed
     gripAngleLeft = gripAngleLeft == 90 ? 0 : 90;  // Toggle grip
-    servoGripLeft.write(gripAngleLeft);
+    pca9685.setPWM(SER_LC, 0, gripAngleLeft)
     delay(servoSpeed);
   }
 }
@@ -482,44 +476,44 @@ void controlRightArm(int leftX, int leftY, int rightX, int rightY)
   // Base movement
   if (leftX < -joystickThreshold && baseAngleRight < 180) {
     baseAngleRight++;
-    servoBaseRight.write(baseAngleRight);
+    pca9685.setPWM(SER_RB, 0, baseAngleRight);
     delay(servoSpeed);
   } else if (leftX > joystickThreshold && baseAngleRight > 0) {
     baseAngleRight--;
-    servoBaseRight.write(baseAngleRight);
+    pca9685.setPWM(SER_RB, 0, baseAngleRight);
     delay(servoSpeed);
   }
 
   // Shoulder movement
   if (leftY < -joystickThreshold && shoulderAngleRight < 180) {
     shoulderAngleRight++;
-    servoShoulderRight.write(shoulderAngleRight);
+    pca9685.setPWM(SER_RS, 0, shoulderAngleRight);
     delay(servoSpeed);
   } else if (leftY > joystickThreshold && shoulderAngleRight > 0) {
     shoulderAngleRight--;
-    servoShoulderRight.write(shoulderAngleRight);
+    pca9685.setPWM(SER_RS, 0, shoulderAngleRight);
     delay(servoSpeed);
   }
 
   // Elbow movement
   if (rightX < -joystickThreshold && elbowAngleRight < 180) {
     elbowAngleRight++;
-    servoElbowRight.write(elbowAngleRight);
+    pca9685.setPWM(SER_RE, 0, elbowAngleRight);
     delay(servoSpeed);
   } else if (rightX > joystickThreshold && elbowAngleRight > 0) {
     elbowAngleRight--;
-    servoElbowRight.write(elbowAngleRight);
+    pca9685.setPWM(SER_RE, 0, elbowAngleRight);
     delay(servoSpeed);
   }
 
   // Wrist pitch movement
   if (rightY < -joystickThreshold && wristPitchAngleRight < 180) {
     wristPitchAngleRight++;
-    servoWristPitchRight.write(wristPitchAngleRight);
+    pca9685.setPWM(SER_RW, 0, wristPitchAngleRight);
     delay(servoSpeed);
   } else if (rightY > joystickThreshold && wristPitchAngleRight > 0) {
     wristPitchAngleRight--;
-    servoWristPitchRight.write(wristPitchAngleRight);
+    pca9685.setPWM(SER_RW, 0, wristPitchAngleRight);
     delay(servoSpeed);
   }
 
@@ -530,12 +524,12 @@ void controlRightArm(int leftX, int leftY, int rightX, int rightY)
 
   if (buttons & 0x04) {  // D-Pad right pressed
     wristRollAngleRight++;
-    servoWristRollRight.write(wristRollAngleRight);
+    pca9685.setPWM(SER_RR, 0, wristRollAngleRight);
     Serial.println("D-Pad Right pressed - Increasing Left Wrist Roll");
     delay(servoSpeed);
   } else if (buttons & 0x08) {  // D-Pad left pressed
     wristRollAngleRight--;
-    servoWristRollRight.write(wristRollAngleRight);
+    pca9685.setPWM(SER_RR, 0, wristRollAngleRight);
     Serial.println("D-Pad Left pressed - Decreasing Left Wrist Roll");
     delay(servoSpeed);
   }
@@ -543,7 +537,7 @@ void controlRightArm(int leftX, int leftY, int rightX, int rightY)
   // Grip control (D-Pad down)
   if (buttons & 0x02) {  // D-Pad down pressed
     gripAngleRight = gripAngleRight == 90 ? 0 : 90;  // Toggle grip
-    servoGripRight.write(gripAngleRight);
+    pca9685.setPWM(SER_RC, 0, gripAngleRight);
     delay(servoSpeed);
   }
 }
