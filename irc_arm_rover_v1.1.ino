@@ -1,8 +1,9 @@
 #include <Bluepad32.h>
 #include <ESP32Servo.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <Wire.h>
 
-Adafruit_PWMServoDriver pwm;
+Adafruit_PWMServoDriver pca9685 = Adafruit_PWMServoDriver(0x40);
 
 //I don't know how many pins are available and which ones to use.
 //Please modify according to preference and Expansion board of ESP32.
@@ -26,27 +27,41 @@ const int motor4Pin2 = 19;
 int joystickThreshold = 15;  // Deadzone for joystick input
 
 #define numServo 12
-#define servoMin 0
-#define servoMax 180
+#define SERVOMIN  80  // Minimum value
+#define SERVOMAX  600  // Maximum value
 
 // Define servo pin assignments for Both Arms
 int servoPins[numServo] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};  // 0 - 5 = Left arm, 6 - 11 = Right Arm.
 
+// Define servo motor connections (expand as required)
+#define SER1 servoPins[0]  //Servo Motor 1 on connector 0
+#define SER2 servoPins[1]  //Servo Motor 2 on connector 1
+#define SER3 servoPins[2]  //Servo Motor 3 on connector 2
+#define SER4 servoPins[3]  //Servo Motor 4 on connector 3
+#define SER5 servoPins[4]  //Servo Motor 5 on connector 4
+#define SER6 servoPins[5]  //Servo Motor 6 on connector 5
+#define SER7 servoPins[6]  //Servo Motor 7 on connector 6
+#define SER8 servoPins[7]  //Servo Motor 8 on connector 7
+#define SER9 servoPins[8]  //Servo Motor 9 on connector 8
+#define SER10 servoPins[9]  //Servo Motor 10 on connector 9
+#define SER11 servoPins[10]  //Servo Motor 11 on connector 10
+#define SER12 servoPins[11]  //Servo Motor 12 on connector 11
+
 // Create servo objects for 6 servos on Left Arm
-Servo servoBaseLeft ;
-Servo servoShoulderLeft;
-Servo servoElbowLeft ;
-Servo servoWristRollLeft ;
-Servo servoWristPitchLeft ;
-Servo servoGripLeft ;
+Servo servoBaseLeft SER1;
+Servo servoShoulderLeft SER2;
+Servo servoElbowLeft SER3;
+Servo servoWristRollLeft SER4;
+Servo servoWristPitchLeft SER5;
+Servo servoGripLeft SER6;
 
 // Create servo objects for 6 servos on Right Arm
-Servo servoBaseRight ;
-Servo servoShoulderRight ;
-Servo servoElbowRight ;
-Servo servoWristRollRight ;
-Servo servoWristPitchRight ;
-Servo servoGripRight;
+Servo servoBaseRight SER7;
+Servo servoShoulderRight SER8;
+Servo servoElbowRight SER9;
+Servo servoWristRollRight SER10;
+Servo servoWristPitchRight SER11;
+Servo servoGripRight SER12;
 
 // Define rover control pins
 const int roverForwardPin = 21;  // Example pin, change as needed
@@ -79,8 +94,13 @@ ControlMode currentMode = BOTH_ARMS;  // Start in both arms mode
 //Define Gamepad
 GamepadPtr myGamepad;
 
-void setup() {
+void setup() 
+{
   Serial.begin(115200);
+  //Initialize PCA9685
+  pca9685.begin();
+  //Set PCA9685 Frequency to 50Hz
+  pca9685.setPWMFreq(50);
 
   // Initialize motor control pins as outputs
   pinMode(motor1Pin1, OUTPUT);
@@ -101,7 +121,6 @@ void setup() {
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
   
-
   // Initialize servos for both arms
   resetServos();
 
@@ -110,10 +129,10 @@ void setup() {
   pinMode(roverBackwardPin, OUTPUT);
   pinMode(roverLeftPin, OUTPUT);
   pinMode(roverRightPin, OUTPUT);
-
 }
 
-void loop() {
+void loop() 
+{
   BP32.update();  // Update Bluepad32 state
 
   if (myGamepad) {
@@ -127,18 +146,21 @@ void loop() {
 
 }
 
-void onConnectedGamepad(GamepadPtr gp) {
+void onConnectedGamepad(GamepadPtr gp) 
+{
   myGamepad = gp;
   Serial.println("Gamepad connected");
 }
 
-void onDisconnectedGamepad(GamepadPtr gp) {
+void onDisconnectedGamepad(GamepadPtr gp) 
+{
   myGamepad = nullptr;
   Serial.println("Gamepad disconnected");
 }
 
 // Function to control the rover using gamepad inputs
-void controlRover() {
+void controlRover() 
+{
   int leftX = myGamepad->axisX();  // Left joystick X-axis for left/right movement
   int leftY = myGamepad->axisY();  // Left joystick Y-axis for forward/backward movement
 
@@ -184,7 +206,8 @@ void controlRover() {
 }
 
 // Rover movement functions
-void moveForward() {
+void moveForward() 
+{
   // Move all motors forward
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW);
@@ -196,7 +219,8 @@ void moveForward() {
   digitalWrite(motor4Pin2, LOW);
 }
 
-void moveBackward() {
+void moveBackward() 
+{
   // Move all motors backward
   digitalWrite(motor1Pin1, LOW);
   digitalWrite(motor1Pin2, HIGH);
@@ -208,7 +232,8 @@ void moveBackward() {
   digitalWrite(motor4Pin2, HIGH);
 }
 
-void moveLeft() {
+void moveLeft() 
+{
   // Move left by adjusting motor directions
   digitalWrite(motor1Pin1, LOW);
   digitalWrite(motor1Pin2, HIGH);
@@ -220,7 +245,8 @@ void moveLeft() {
   digitalWrite(motor4Pin2, LOW);
 }
 
-void moveRight() {
+void moveRight() 
+{
   // Move right by adjusting motor directions
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW);
@@ -232,7 +258,8 @@ void moveRight() {
   digitalWrite(motor4Pin2, HIGH);
 }
 
-void turnLeft() {
+void turnLeft() 
+{
   // Turn left by reversing right motors and driving left motors forward
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW);
@@ -244,7 +271,8 @@ void turnLeft() {
   digitalWrite(motor4Pin2, HIGH);
 }
 
-void turnRight() {
+void turnRight() 
+{
   // Turn right by reversing left motors and driving right motors forward
   digitalWrite(motor1Pin1, LOW);
   digitalWrite(motor1Pin2, HIGH);
@@ -256,7 +284,8 @@ void turnRight() {
   digitalWrite(motor4Pin2, LOW);
 }
 
-void moveForwardLeft() {
+void moveForwardLeft() 
+{
   // Move diagonally forward-left
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW);
@@ -268,7 +297,8 @@ void moveForwardLeft() {
   digitalWrite(motor4Pin2, HIGH);
 }
 
-void moveForwardRight() {
+void moveForwardRight() 
+{
   // Move diagonally forward-right
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW);
@@ -280,7 +310,8 @@ void moveForwardRight() {
   digitalWrite(motor4Pin2, LOW);
 }
 
-void moveBackwardLeft() {
+void moveBackwardLeft() 
+{
   // Move diagonally backward-left
   digitalWrite(motor1Pin1, LOW);
   digitalWrite(motor1Pin2, HIGH);
@@ -292,7 +323,8 @@ void moveBackwardLeft() {
   digitalWrite(motor4Pin2, LOW);
 }
 
-void moveBackwardRight() {
+void moveBackwardRight() 
+{
   // Move diagonally backward-right
   digitalWrite(motor1Pin1, LOW);
   digitalWrite(motor1Pin2, HIGH);
@@ -304,7 +336,8 @@ void moveBackwardRight() {
   digitalWrite(motor4Pin2, HIGH);
 }
 
-void stopMovement() {
+void stopMovement() 
+{
   // Stop all motors
   digitalWrite(motor1Pin1, LOW);
   digitalWrite(motor1Pin2, LOW);
@@ -317,7 +350,8 @@ void stopMovement() {
 }
 
 // Reset servo positions
-void resetServos() {
+void resetServos() 
+{
   servoGripLeft.write(gripAngleLeft);
   servoWristRollLeft.write(wristRollAngleLeft);
 
@@ -326,7 +360,8 @@ void resetServos() {
 }
 
 // Switch between different control modes
-void checkModeChange() {
+void checkModeChange() 
+{
   uint16_t buttons = myGamepad->buttons();  // Read the button values
 
   // X button (Left arm)
@@ -352,7 +387,8 @@ void checkModeChange() {
 }
 
 // Control servos based on the current mode
-void controlServos() {
+void controlServos() 
+{
   int leftX = myGamepad->axisX();   // Base rotation
   int leftY = myGamepad->axisY();   // Shoulder movement
   int rightX = myGamepad->axisRX(); // Elbow movement
@@ -375,7 +411,8 @@ void controlServos() {
   }
 }
 
-void controlLeftArm(int leftX, int leftY, int rightX, int rightY) {
+void controlLeftArm(int leftX, int leftY, int rightX, int rightY) 
+{
   // Base movement
   if (leftX < -joystickThreshold && baseAngleLeft < 180) {
     baseAngleLeft++;
@@ -440,7 +477,8 @@ void controlLeftArm(int leftX, int leftY, int rightX, int rightY) {
   }
 }
 
-void controlRightArm(int leftX, int leftY, int rightX, int rightY) {
+void controlRightArm(int leftX, int leftY, int rightX, int rightY) 
+{
   // Base movement
   if (leftX < -joystickThreshold && baseAngleRight < 180) {
     baseAngleRight++;
@@ -487,8 +525,8 @@ void controlRightArm(int leftX, int leftY, int rightX, int rightY) {
 
   // Wrist roll control (D-Pad left/right)
   uint16_t buttons = myGamepad->buttons();  // Read the button values
-Serial.print("Button state: ");
-Serial.println(buttons, HEX);
+  Serial.print("Button state: ");
+  Serial.println(buttons, HEX);
 
   if (buttons & 0x04) {  // D-Pad right pressed
     wristRollAngleRight++;
