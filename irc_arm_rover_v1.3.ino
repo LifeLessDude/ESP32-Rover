@@ -331,7 +331,7 @@ void stopMovement()
   digitalWrite(motor4Pin2, LOW);
 }
 
-void angleToPulse()
+int angleToPulse(int angle)
 {
   return map(angle, 0, 180, SERVOMIN, SERVOMAX); 
 }
@@ -339,18 +339,19 @@ void angleToPulse()
 // Reset servo positions
 void resetServos() 
 {
-  pca9685.setPWM(SER_LB, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LS, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LE, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LW, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LR, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LC, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RB, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RS, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RE, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RW, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RR, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RC, 0, angleToPulse(90));
+  int pwm = angleToPulse(90);
+  pca9685.setPWM(SER_LB, 0, pwm);
+  pca9685.setPWM(SER_LS, 0, pwm);
+  pca9685.setPWM(SER_LE, 0, pwm);
+  pca9685.setPWM(SER_LW, 0, pwm);
+  pca9685.setPWM(SER_LR, 0, pwm);
+  pca9685.setPWM(SER_LC, 0, pwm);
+  pca9685.setPWM(SER_RB, 0, pwm);
+  pca9685.setPWM(SER_RS, 0, pwm);
+  pca9685.setPWM(SER_RE, 0, pwm);
+  pca9685.setPWM(SER_RW, 0, pwm);
+  pca9685.setPWM(SER_RR, 0, pwm);
+  pca9685.setPWM(SER_RC, 0, pwm);
 }
 
 // Switch between different control modes
@@ -421,33 +422,33 @@ void controlLeftArm(int leftX, int leftY, int rightX, int rightY)
   // Shoulder movement
   if (leftY < -joystickThreshold && shoulderAngleLeft < 180) {
     shoulderAngleLeft++;
-    pca9685.setPWM(SER_LS, 0, shoulderAngleLeft);
+    pca9685.setPWM(SER_LS, 0, angleToPulse(shoulderAngleLeft));
     delay(servoSpeed);
   } else if (leftY > joystickThreshold && shoulderAngleLeft > 0) {
     shoulderAngleLeft--;
-    pca9685.setPWM(SER_LS, 0, shoulderAngleLeft);
+    pca9685.setPWM(SER_LS, 0, angleToPulse(shoulderAngleLeft));
     delay(servoSpeed);
   }
 
   // Elbow movement
   if (rightX < -joystickThreshold && elbowAngleLeft < 180) {
     elbowAngleLeft++;
-    pca9685.setPWM(SER_LE, 0, elbowAngleLeft);
+    pca9685.setPWM(SER_LE, 0, angleToPulse(elbowAngleLeft));
     delay(servoSpeed);
   } else if (rightX > joystickThreshold && elbowAngleLeft > 0) {
     elbowAngleLeft--;
-    pca9685.setPWM(SER_LE, 0, elbowAngleLeft);
+    pca9685.setPWM(SER_LE, 0, angleToPulse(elbowAngleLeft));
     delay(servoSpeed);
   }
 
   // Wrist pitch movement
   if (rightY < -joystickThreshold && wristPitchAngleLeft < 180) {
     wristPitchAngleLeft++;
-    pca9685.setPWM(SER_LW, 0, wristPitchAngleLeft);
+    pca9685.setPWM(SER_LW, 0, angleToPulse(wristPitchAngleLeft));
     delay(servoSpeed);
   } else if (rightY > joystickThreshold && wristPitchAngleLeft > 0) {
     wristPitchAngleLeft--;
-    pca9685.setPWM(SER_LW, 0, wristPutchAngleLeft);
+    pca9685.setPWM(SER_LW, 0, angleToPulse(wristPutchAngleLeft));
     delay(servoSpeed);
   }
 
@@ -455,18 +456,18 @@ void controlLeftArm(int leftX, int leftY, int rightX, int rightY)
   uint16_t buttons = myGamepad->buttons();  // Read the button values
   if (buttons & 0x04) {  // D-Pad right pressed
     wristRollAngleLeft++;
-    pca9685.setPWM(SER_LR, 0, wristRollAngleLeft);
+    pca9685.setPWM(SER_LR, 0, angleToPulse(wristRollAngleLeft));
     delay(servoSpeed);
   } else if (buttons & 0x08) {  // D-Pad left pressed
     wristRollAngleLeft--;
-    pca9685.setPWM(SER_LR, 0, writsRollAngleLeft);
+    pca9685.setPWM(SER_LR, 0, angleToPulse(writsRollAngleLeft));
     delay(servoSpeed);
   }
 
   // Grip control (D-Pad down)
   if (buttons & 0x02) {  // D-Pad down pressed
     gripAngleLeft = gripAngleLeft == 90 ? 0 : 90;  // Toggle grip
-    pca9685.setPWM(SER_LC, 0, gripAngleLeft)
+    pca9685.setPWM(SER_LC, 0, angleToPulse(gripAngleLeft));
     delay(servoSpeed);
   }
 }
@@ -476,44 +477,44 @@ void controlRightArm(int leftX, int leftY, int rightX, int rightY)
   // Base movement
   if (leftX < -joystickThreshold && baseAngleRight < 180) {
     baseAngleRight++;
-    pca9685.setPWM(SER_RB, 0, baseAngleRight);
+    pca9685.setPWM(SER_RB, 0, angleToPulse(baseAngleRight));
     delay(servoSpeed);
   } else if (leftX > joystickThreshold && baseAngleRight > 0) {
     baseAngleRight--;
-    pca9685.setPWM(SER_RB, 0, baseAngleRight);
+    pca9685.setPWM(SER_RB, 0, angleToPulse(baseAngleRight));
     delay(servoSpeed);
   }
 
   // Shoulder movement
   if (leftY < -joystickThreshold && shoulderAngleRight < 180) {
     shoulderAngleRight++;
-    pca9685.setPWM(SER_RS, 0, shoulderAngleRight);
+    pca9685.setPWM(SER_RS, 0, angleToPulse(shoulderAngleRight));
     delay(servoSpeed);
   } else if (leftY > joystickThreshold && shoulderAngleRight > 0) {
     shoulderAngleRight--;
-    pca9685.setPWM(SER_RS, 0, shoulderAngleRight);
+    pca9685.setPWM(SER_RS, 0, angleToPulse(shoulderAngleRight));
     delay(servoSpeed);
   }
 
   // Elbow movement
   if (rightX < -joystickThreshold && elbowAngleRight < 180) {
     elbowAngleRight++;
-    pca9685.setPWM(SER_RE, 0, elbowAngleRight);
+    pca9685.setPWM(SER_RE, 0, angleToPulse(elbowAngleRight));
     delay(servoSpeed);
   } else if (rightX > joystickThreshold && elbowAngleRight > 0) {
     elbowAngleRight--;
-    pca9685.setPWM(SER_RE, 0, elbowAngleRight);
+    pca9685.setPWM(SER_RE, 0, angleToPulse(elbowAngleRight));
     delay(servoSpeed);
   }
 
   // Wrist pitch movement
   if (rightY < -joystickThreshold && wristPitchAngleRight < 180) {
     wristPitchAngleRight++;
-    pca9685.setPWM(SER_RW, 0, wristPitchAngleRight);
+    pca9685.setPWM(SER_RW, 0, angleToPulse(wristPitchAngleRight));
     delay(servoSpeed);
   } else if (rightY > joystickThreshold && wristPitchAngleRight > 0) {
     wristPitchAngleRight--;
-    pca9685.setPWM(SER_RW, 0, wristPitchAngleRight);
+    pca9685.setPWM(SER_RW, 0, angleToPulse(wristPitchAngleRight));
     delay(servoSpeed);
   }
 
@@ -524,12 +525,12 @@ void controlRightArm(int leftX, int leftY, int rightX, int rightY)
 
   if (buttons & 0x04) {  // D-Pad right pressed
     wristRollAngleRight++;
-    pca9685.setPWM(SER_RR, 0, wristRollAngleRight);
+    pca9685.setPWM(SER_RR, 0, angleToPulse(wristRollAngleRight));
     Serial.println("D-Pad Right pressed - Increasing Left Wrist Roll");
     delay(servoSpeed);
   } else if (buttons & 0x08) {  // D-Pad left pressed
     wristRollAngleRight--;
-    pca9685.setPWM(SER_RR, 0, wristRollAngleRight);
+    pca9685.setPWM(SER_RR, 0, angleToPulse(wristRollAngleRight));
     Serial.println("D-Pad Left pressed - Decreasing Left Wrist Roll");
     delay(servoSpeed);
   }
@@ -537,7 +538,7 @@ void controlRightArm(int leftX, int leftY, int rightX, int rightY)
   // Grip control (D-Pad down)
   if (buttons & 0x02) {  // D-Pad down pressed
     gripAngleRight = gripAngleRight == 90 ? 0 : 90;  // Toggle grip
-    pca9685.setPWM(SER_RC, 0, gripAngleRight);
+    pca9685.setPWM(SER_RC, 0, angleToPulse(gripAngleRight));
     delay(servoSpeed);
   }
 }
