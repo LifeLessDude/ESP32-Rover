@@ -5,9 +5,9 @@
 
 Adafruit_PWMServoDriver pca9685 = Adafruit_PWMServoDriver(0x40);
 
-//I don't know how many pins are available and which ones to use.
 //Please modify according to preference and Expansion board of ESP32.
 //Modify PCA9685 Pins accordingly.
+//Configured for MG996R and MG958 Servo motors
 
 // Define motor control pins for Front Left motor (Motor 1)
 const int motor1Pin1 = 12;
