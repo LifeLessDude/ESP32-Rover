@@ -339,18 +339,19 @@ int angleToPulse(int angle)
 // Reset servo positions
 void resetServos() 
 {
-  pca9685.setPWM(SER_LB, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LS, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LE, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LW, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LR, 0, angleToPulse(90));
-  pca9685.setPWM(SER_LC, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RB, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RS, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RE, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RW, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RR, 0, angleToPulse(90));
-  pca9685.setPWM(SER_RC, 0, angleToPulse(90));
+  int pwm = angleToPulse(90);
+  pca9685.setPWM(SER_LB, 0, pwm);
+  pca9685.setPWM(SER_LS, 0, pwm);
+  pca9685.setPWM(SER_LE, 0, pwm);
+  pca9685.setPWM(SER_LW, 0, pwm);
+  pca9685.setPWM(SER_LR, 0, pwm);
+  pca9685.setPWM(SER_LC, 0, pwm);
+  pca9685.setPWM(SER_RB, 0, pwm);
+  pca9685.setPWM(SER_RS, 0, pwm);
+  pca9685.setPWM(SER_RE, 0, pwm);
+  pca9685.setPWM(SER_RW, 0, pwm);
+  pca9685.setPWM(SER_RR, 0, pwm);
+  pca9685.setPWM(SER_RC, 0, pwm);
 }
 
 // Switch between different control modes
@@ -466,7 +467,7 @@ void controlLeftArm(int leftX, int leftY, int rightX, int rightY)
   // Grip control (D-Pad down)
   if (buttons & 0x02) {  // D-Pad down pressed
     gripAngleLeft = gripAngleLeft == 90 ? 0 : 90;  // Toggle grip
-    pca9685.setPWM(SER_LC, 0, angleToPulse(gripAngleLeft))
+    pca9685.setPWM(SER_LC, 0, angleToPulse(gripAngleLeft));
     delay(servoSpeed);
   }
 }
