@@ -460,7 +460,7 @@ void controlLeftArm(int leftX, int leftY, int rightX, int rightY)
     delay(servoSpeed);
   } else if (buttons & 0x08) {  // D-Pad left pressed
     wristRollAngleLeft--;
-    pca9685.setPWM(SER_LR, 0, angleToPulse(writsRollAngleLeft));
+    pca9685.setPWM(SER_LR, 0, angleToPulse(wristRollAngleLeft));
     delay(servoSpeed);
   }
 
