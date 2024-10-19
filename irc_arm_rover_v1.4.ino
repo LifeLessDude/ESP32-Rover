@@ -448,7 +448,7 @@ void controlLeftArm(int leftX, int leftY, int rightX, int rightY)
     delay(servoSpeed);
   } else if (rightY > joystickThreshold && wristPitchAngleLeft > 0) {
     wristPitchAngleLeft--;
-    pca9685.setPWM(SER_LW, 0, angleToPulse(wristPutchAngleLeft));
+    pca9685.setPWM(SER_LW, 0, angleToPulse(wristPitchAngleLeft));
     delay(servoSpeed);
   }
 
