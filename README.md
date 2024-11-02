@@ -7,3 +7,4 @@ The arms use 6 servos each - 1 for the base, 3 for the joints, 1 for the Roll ax
 
 The motor used for the wheels are Johnson DC gear motors. The wheels of the rover are in a 4-wheel drive formation using Mecanum wheels for omnidirectional movement.
 
+There is an included code for checking the functionality of chosen servos with PCA9685 servo driver
